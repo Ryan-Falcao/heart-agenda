@@ -1,4 +1,4 @@
-import { StoreProvider } from "./store";
+import { StoreProvider, useStore } from "./store";
 import { NavProvider, useNav } from "./nav";
 import { HomeScreen } from "./HomeScreen";
 import { SearchScreen } from "./SearchScreen";
@@ -8,6 +8,13 @@ import { CalendarScreen } from "./CalendarScreen";
 import { ProfileScreen } from "./ProfileScreen";
 import { BottomNav } from "./BottomNav";
 import { Toast } from "./ui";
+import { useNotificationScheduler } from "./useNotificationScheduler";
+
+const NotificationScheduler = () => {
+  const { state, toast } = useStore();
+  useNotificationScheduler(state.eventos, toast);
+  return null;
+};
 
 const Router = () => {
   const { screen } = useNav();
@@ -32,6 +39,7 @@ export const AppRoot = () => {
     <div className="min-h-screen w-full bg-[#F3F4F6]">
       <StoreProvider>
         <NavProvider>
+          <NotificationScheduler />
           <div className="relative mx-auto min-h-screen w-full max-w-[390px] bg-white">
             <Router />
             <BottomNav />
