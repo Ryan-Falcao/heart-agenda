@@ -44,6 +44,7 @@ interface State {
 }
 
 const initialState = (): State => {
+  // Só acessa localStorage no cliente
   if (typeof window !== "undefined") {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -52,6 +53,8 @@ const initialState = (): State => {
       // ignore
     }
   }
+
+  // Estado inicial sem datas dinâmicas (evita hydration mismatch)
   const sharedId = "ag-shared-1";
   return {
     usuario: { nome: "Ryan", email: "ryan@email.com" },
@@ -91,53 +94,9 @@ const initialState = (): State => {
         subtitulo: "Compartilhada • 2 membros",
       },
     ],
-    eventos: [
-      {
-        id: "ev-1",
-        agendaId: "ag-trabalho",
-        nome: "Reunião de status",
-        data: today(),
-        horaInicio: "10:00",
-        horaFim: "11:00",
-        repeticao: "Não repete",
-        lembrete: "15 min",
-        prioridade: "Média",
-      },
-      {
-        id: "ev-2",
-        agendaId: "ag-trabalho",
-        nome: "Apresentação com cliente",
-        data: today(),
-        horaInicio: "14:00",
-        horaFim: "15:30",
-        repeticao: "Não repete",
-        lembrete: "30 min",
-        prioridade: "Alta",
-      },
-      {
-        id: "ev-3",
-        agendaId: "ag-trabalho",
-        nome: "Almoço",
-        data: today(),
-        horaInicio: "18:00",
-        horaFim: "19:00",
-        repeticao: "Não repete",
-        lembrete: "Sem lembrete",
-        prioridade: "Baixa",
-      },
-    ],
-    tasks: [
-      {
-        id: "t-1",
-        agendaId: sharedId,
-        nome: "Revisar relatório",
-        descricao: "Conferir as métricas do Q1 antes da reunião.",
-        prazo: tomorrow(),
-        prioridade: "Alta",
-        responsaveis: ["m-nicolas"],
-        concluida: false,
-      },
-    ],
+    // Sem eventos de exemplo — evita datas dinâmicas que quebram SSR
+    eventos: [],
+    tasks: [],
     membros: [
       {
         id: "m-ryan",
@@ -271,13 +230,20 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(reducer, undefined, initialState);
   const [toastMsg, setToastMsg] = useState<ToastMsg | null>(null);
 
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch {
-      // ignore
-    }
-  }, [state]);
+const [hydrated, setHydrated] = useState(false);
+
+useEffect(() => {
+  setHydrated(true);
+}, []);
+
+useEffect(() => {
+  if (!hydrated) return;
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch {
+    // ignore
+  }
+}, [state, hydrated]);
 
   const toast = (t: ToastMsg) => {
     setToastMsg(t);
