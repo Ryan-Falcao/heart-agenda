@@ -10,7 +10,7 @@ const OFFSET_MS: Record<string, number> = {
 };
 
 const STORAGE_KEY = "notificados-v1";
-const JANELA_ATRASO_MS = 60_000; // ignora notificações com mais de 1 min de atraso
+const JANELA_ATRASO_MS = 60_000;
 
 const carregarNotificados = (): Set<string> => {
   try {
@@ -33,7 +33,11 @@ export function useNotificationScheduler(
 ) {
   const eventosRef = useRef(eventos);
   const toastRef = useRef(toast);
-  const notificadosRef = useRef<Set<string>>(carregarNotificados());
+  const notificadosRef = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    notificadosRef.current = carregarNotificados();
+  }, []);
 
   useEffect(() => {
     eventosRef.current = eventos;
@@ -66,25 +70,6 @@ export function useNotificationScheduler(
         const chave = `${evento.id}-${evento.lembrete}`;
         const atraso = agora - momentoNotificar;
 
-        // Só notifica se está dentro da janela (não notifica coisas antigas)
-        if (atraso >= 0 && atraso <= JANELA_ATRASO_MS && !notificadosRef.current.has(chave)) {
-          notificadosRef.current.add(chave);
-          salvarNotificados(notificadosRef.current);
-
-          toastRef.current({
-            kind: "warning",
-            text: `🔔 ${evento.nome} — começa em ${evento.lembrete}`,
-          });
-
-          if ("Notification" in window && Notification.permission === "granted") {
-            new Notification("Agenda Digital", {
-              body: `⏰ ${evento.nome} começa em ${evento.lembrete}`,
-              icon: "/favicon.ico",
-            });
-          }
-        }
-
-        // Marca como notificado mesmo que já tenha passado, para não disparar no futuro
         if (atraso > JANELA_ATRASO_MS && !notificadosRef.current.has(chave)) {
           notificadosRef.current.add(chave);
           salvarNotificados(notificad
