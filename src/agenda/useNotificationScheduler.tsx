@@ -1,5 +1,3 @@
-No arquivo src/agenda/useNotificationScheduler.tsx, 
-substitua o conteúdo completo por este:
 
 import { useEffect, useRef } from "react";
 import type { Evento } from "./types";
