@@ -1,17 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AppRoot } from "@/agenda/AppRoot";
-import { useEffect, useState } from "react";
+import { lazy, Suspense } from "react";
 
-function ClientOnly() {
-  const [mounted, setMounted] = useState(false);
+const AppRoot = lazy(() =>
+  import("@/agenda/AppRoot").then((m) => ({ default: m.AppRoot }))
+);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return null;
-
-  return <AppRoot />;
+function App() {
+  return (
+    <Suspense fallback={null}>
+      <AppRoot />
+    </Suspense>
+  );
 }
 
 export const Route = createFileRoute("/")({
@@ -21,5 +20,6 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Organize suas agendas pessoais e compartilhadas." },
     ],
   }),
-  component: ClientOnly,
+  ssr: false,
+  component: App,
 });
