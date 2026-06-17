@@ -29,21 +29,40 @@ export function useNotificationScheduler(
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    if ("Notification" in window && Notification.permission === "default") {
-      Notification.requestPermission();
+    console.log("🔔 useNotificationScheduler iniciado");
+
+    if ("Notification" in window) {
+      console.log("Permissão atual:", Notification.permission);
+
+      if (Notification.permission === "default") {
+        Notification.requestPermission().then((permission) => {
+          console.log("Nova permissão:", permission);
+        });
+      }
     }
 
     const verificar = () => {
       const agora = Date.now();
 
       console.log("================================");
+      console.log("Verificando notificações...");
       console.log("Agora:", new Date(agora));
+      console.log("Quantidade de eventos:", eventosRef.current.length);
 
       for (const evento of eventosRef.current) {
-        if (!evento.lembrete || evento.lembrete === "Sem lembrete") continue;
+        console.log("Evento encontrado:", evento);
+
+        if (!evento.lembrete || evento.lembrete === "Sem lembrete") {
+          console.log("Evento sem lembrete");
+          continue;
+        }
 
         const offset = OFFSET_MS[evento.lembrete];
-        if (offset === undefined) continue;
+
+        if (offset === undefined) {
+          console.log("Lembrete inválido:", evento.lembrete);
+          continue;
+        }
 
         const dataHora = new Date(
           `${evento.data}T${evento.horaInicio}:00`
@@ -58,26 +77,25 @@ export function useNotificationScheduler(
         const chave = `${evento.id}-${evento.lembrete}`;
 
         console.log({
-          evento: evento.nome,
+          nome: evento.nome,
           data: evento.data,
           horaInicio: evento.horaInicio,
           lembrete: evento.lembrete,
           dataHoraEvento: dataHora,
           momentoNotificar: new Date(momentoNotificar),
-          diferencaSegundos: Math.floor(
+          agora: new Date(agora),
+          atrasoSegundos: Math.floor(
             (agora - momentoNotificar) / 1000
           ),
           jaNotificado: notificados.has(chave),
         });
 
-        // Melhor que a lógica original:
-        // dispara se já passou do horário e ainda não notificou
         if (agora >= momentoNotificar && !notificados.has(chave)) {
+          console.log("🚨 DISPARANDO NOTIFICAÇÃO:", evento.nome);
+
           notificados.add(chave);
 
           const label = `em ${evento.lembrete}`;
-
-          console.log("🔔 NOTIFICAÇÃO DISPARADA:", evento.nome);
 
           toastRef.current({
             kind: "warning",
@@ -92,6 +110,11 @@ export function useNotificationScheduler(
               body: `⏰ ${evento.nome} começa ${label}`,
               icon: "/favicon.ico",
             });
+          } else {
+            console.log(
+              "❌ Notificação bloqueada. Permissão:",
+              Notification.permission
+            );
           }
         }
       }
@@ -99,7 +122,6 @@ export function useNotificationScheduler(
 
     verificar();
 
-    // verifica a cada 10 segundos
     const intervalo = window.setInterval(verificar, 10_000);
 
     return () => window.clearInterval(intervalo);
