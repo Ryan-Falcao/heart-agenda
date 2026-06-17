@@ -17,22 +17,6 @@ import type {
 
 const STORAGE_KEY = "agenda-digital-v1";
 
-const today = () => {
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-};
-
-const tomorrow = () => {
-  const d = new Date();
-  d.setDate(d.getDate() + 1);
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-};
 
 interface State {
   usuario: Usuario;
