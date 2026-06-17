@@ -9,7 +9,23 @@ const OFFSET_MS: Record<string, number> = {
   "1 dia": 24 * 60 * 60 * 1000,
 };
 
-const notificados = new Set<string>();
+const STORAGE_KEY = "notificados-v1";
+const JANELA_ATRASO_MS = 60_000; // ignora notificações com mais de 1 min de atraso
+
+const carregarNotificados = (): Set<string> => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? new Set(JSON.parse(raw)) : new Set();
+  } catch {
+    return new Set();
+  }
+};
+
+const salvarNotificados = (set: Set<string>) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify([...set]));
+  } catch {}
+};
 
 export function useNotificationScheduler(
   eventos: Evento[],
@@ -17,6 +33,7 @@ export function useNotificationScheduler(
 ) {
   const eventosRef = useRef(eventos);
   const toastRef = useRef(toast);
+  const notificadosRef = useRef<Set<string>>(carregarNotificados());
 
   useEffect(() => {
     eventosRef.current = eventos;
@@ -29,101 +46,45 @@ export function useNotificationScheduler(
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    console.log("🔔 useNotificationScheduler iniciado");
-
-    if ("Notification" in window) {
-      console.log("Permissão atual:", Notification.permission);
-
-      if (Notification.permission === "default") {
-        Notification.requestPermission().then((permission) => {
-          console.log("Nova permissão:", permission);
-        });
-      }
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
     }
 
     const verificar = () => {
       const agora = Date.now();
 
-      console.log("================================");
-      console.log("Verificando notificações...");
-      console.log("Agora:", new Date(agora));
-      console.log("Quantidade de eventos:", eventosRef.current.length);
-
       for (const evento of eventosRef.current) {
-        console.log("Evento encontrado:", evento);
-
-        if (!evento.lembrete || evento.lembrete === "Sem lembrete") {
-          console.log("Evento sem lembrete");
-          continue;
-        }
+        if (!evento.lembrete || evento.lembrete === "Sem lembrete") continue;
 
         const offset = OFFSET_MS[evento.lembrete];
+        if (offset === undefined) continue;
 
-        if (offset === undefined) {
-          console.log("Lembrete inválido:", evento.lembrete);
-          continue;
-        }
-
-        const dataHora = new Date(
-          `${evento.data}T${evento.horaInicio}:00`
-        );
-
-        if (isNaN(dataHora.getTime())) {
-          console.log("Data inválida:", evento);
-          continue;
-        }
+        const dataHora = new Date(`${evento.data}T${evento.horaInicio}:00`);
+        if (isNaN(dataHora.getTime())) continue;
 
         const momentoNotificar = dataHora.getTime() - offset;
         const chave = `${evento.id}-${evento.lembrete}`;
+        const atraso = agora - momentoNotificar;
 
-        console.log({
-          nome: evento.nome,
-          data: evento.data,
-          horaInicio: evento.horaInicio,
-          lembrete: evento.lembrete,
-          dataHoraEvento: dataHora,
-          momentoNotificar: new Date(momentoNotificar),
-          agora: new Date(agora),
-          atrasoSegundos: Math.floor(
-            (agora - momentoNotificar) / 1000
-          ),
-          jaNotificado: notificados.has(chave),
-        });
-
-        if (agora >= momentoNotificar && !notificados.has(chave)) {
-          console.log("🚨 DISPARANDO NOTIFICAÇÃO:", evento.nome);
-
-          notificados.add(chave);
-
-          const label = `em ${evento.lembrete}`;
+        // Só notifica se está dentro da janela (não notifica coisas antigas)
+        if (atraso >= 0 && atraso <= JANELA_ATRASO_MS && !notificadosRef.current.has(chave)) {
+          notificadosRef.current.add(chave);
+          salvarNotificados(notificadosRef.current);
 
           toastRef.current({
             kind: "warning",
-            text: `🔔 ${evento.nome} — começa ${label}`,
+            text: `🔔 ${evento.nome} — começa em ${evento.lembrete}`,
           });
 
-          if (
-            "Notification" in window &&
-            Notification.permission === "granted"
-          ) {
+          if ("Notification" in window && Notification.permission === "granted") {
             new Notification("Agenda Digital", {
-              body: `⏰ ${evento.nome} começa ${label}`,
+              body: `⏰ ${evento.nome} começa em ${evento.lembrete}`,
               icon: "/favicon.ico",
             });
-          } else {
-            console.log(
-              "❌ Notificação bloqueada. Permissão:",
-              Notification.permission
-            );
           }
         }
-      }
-    };
 
-    verificar();
-
-    const intervalo = window.setInterval(verificar, 10_000);
-
-    return () => window.clearInterval(intervalo);
-  }, []);
-}
+        // Marca como notificado mesmo que já tenha passado, para não disparar no futuro
+        if (atraso > JANELA_ATRASO_MS && !notificadosRef.current.has(chave)) {
+          notificadosRef.current.add(chave);
+          salvarNotificados(notificad
