@@ -29,18 +29,15 @@ const salvarNotificados = (set: Set<string>) => {
 
 const tocarSom = () => {
   try {
-    const ctx = new AudioContext();
-    const oscillator = ctx.createOscillator();
-    const gainNode = ctx.createGain();
-    oscillator.connect(gainNode);
-    gainNode.connect(ctx.destination);
-    oscillator.frequency.setValueAtTime(880, ctx.currentTime);
-    oscillator.frequency.setValueAtTime(660, ctx.currentTime + 0.15);
-    oscillator.frequency.setValueAtTime(880, ctx.currentTime + 0.3);
-    gainNode.gain.setValueAtTime(0.4, ctx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
-    oscillator.start(ctx.currentTime);
-    oscillator.stop(ctx.currentTime + 0.6);
+    // Beep curto em base64 (WAV gerado)
+    const beep = "data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAA" +
+      "ABAAEAQB8AAEAfAAABAAgAZGF0YU" +
+      "hvT18AAAAAAAAAAAAAAAAAAAAAAAAA" +
+      "AAAAAAAAAAAAAAAAAAAAAAAAAAAAA" +
+      "AAAAAAAAAAAAAAAAAAA=";
+    const audio = new Audio(beep);
+    audio.volume = 1.0;
+    audio.play().catch(() => {});
   } catch {}
 };
 
