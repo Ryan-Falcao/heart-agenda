@@ -50,7 +50,7 @@ export function useNotificationScheduler(
 
         const momentoNotificar = dataHora.getTime() - offset;
         const chave = `${evento.id}-${evento.lembrete}`;
-        const dentro = Math.abs(agora - momentoNotificar) <= 30_000;
+        const dentro = Math.abs(agora - momentoNotificar) <= 60_000;
 
         if (dentro && !notificados.has(chave)) {
           notificados.add(chave);
@@ -77,7 +77,7 @@ export function useNotificationScheduler(
 
     // Roda imediatamente uma vez e depois a cada 30s
     verificar();
-    const intervalo = window.setInterval(verificar, 30_000);
+    const intervalo = window.setInterval(verificar, 10_000);
 
     return () => window.clearInterval(intervalo);
   }, []); // array vazio — roda só no mount, no client
