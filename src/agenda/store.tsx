@@ -206,6 +206,8 @@ const reducer = (state: State, action: Action): State => {
         agendas: [...state.agendas, action.agenda],
         membros: [...state.membros, action.membro],
       };
+    case "SET_NOTIF":
+      return { ...state, notif: { ...state.notif, ...action.patch } };
     default:
       return state;
   }
