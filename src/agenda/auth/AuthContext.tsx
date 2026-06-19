@@ -189,7 +189,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const updateProfile = useCallback<AuthCtx["updateProfile"]>(
     async (patch) => {
       if (!user) return { error: "Não autenticado." };
-      const updates: Record<string, unknown> = {};
+      const updates: {
+        nome?: string;
+        sobrenome?: string;
+        data_nascimento?: string | null;
+        avatar_url?: string | null;
+      } = {};
       if (patch.nome !== undefined) updates.nome = patch.nome.trim();
       if (patch.sobrenome !== undefined)
         updates.sobrenome = patch.sobrenome.trim();
@@ -200,7 +205,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         try {
           const path = await uploadAvatar(user.id, patch.avatarFile);
           updates.avatar_url = path;
-        } catch (e) {
+        } catch {
           return { error: "Falha ao enviar a foto." };
         }
       }
