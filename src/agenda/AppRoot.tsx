@@ -45,6 +45,7 @@ export const AppRoot = () => {
             <Router />
             <BottomNav />
             <Toast />
+            <NotificationPermissionPrompt />
           </div>
         </NavProvider>
       </StoreProvider>
