@@ -142,10 +142,13 @@ type Action =
   | { type: "DELETE_MEMBRO"; id: string }
   | { type: "ADD_COMENTARIO"; comentario: Comentario }
   | { type: "JOIN_AGENDA"; agenda: Agenda; membro: Membro }
-  | { type: "SET_NOTIF"; patch: Partial<NotifSettings> };
+  | { type: "SET_NOTIF"; patch: Partial<NotifSettings> }
+  | { type: "SET_USUARIO"; usuario: Usuario };
 
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
+    case "SET_USUARIO":
+      return { ...state, usuario: action.usuario };
     case "ADD_AGENDA":
       return { ...state, agendas: [...state.agendas, action.agenda] };
     case "UPDATE_AGENDA":
