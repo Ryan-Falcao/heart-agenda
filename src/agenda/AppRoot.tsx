@@ -9,10 +9,11 @@ import { ProfileScreen } from "./ProfileScreen";
 import { BottomNav } from "./BottomNav";
 import { Toast } from "./ui";
 import { useNotificationScheduler } from "./useNotificationScheduler";
+import { NotificationPermissionPrompt } from "./NotificationPermissionPrompt";
 
 const NotificationScheduler = () => {
   const { state, toast } = useStore();
-  useNotificationScheduler(state.eventos, toast);
+  useNotificationScheduler(state.eventos, state.notif, toast);
   return null;
 };
 
