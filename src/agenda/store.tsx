@@ -106,6 +106,12 @@ const initialState = (): State => {
       },
     ],
     comentarios: [],
+    notif: {
+      ativadas: true,
+      somAtivo: true,
+      antecedenciaMin: 15,
+      permissaoSolicitada: false,
+    },
   };
 };
 
