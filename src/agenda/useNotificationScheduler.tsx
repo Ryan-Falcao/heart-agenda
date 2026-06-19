@@ -1,13 +1,7 @@
 import { useEffect, useRef } from "react";
 import type { Evento } from "./types";
-
-const OFFSET_MS: Record<string, number> = {
-  "5 min": 5 * 60 * 1000,
-  "15 min": 15 * 60 * 1000,
-  "30 min": 30 * 60 * 1000,
-  "1 hora": 60 * 60 * 1000,
-  "1 dia": 24 * 60 * 60 * 1000,
-};
+import type { NotifSettings } from "./store";
+import { playAlertSound, showSystemNotification, userHasInteracted } from "./notifications";
 
 const STORAGE_KEY = "notificados-v1";
 const JANELA_ATRASO_MS = 60_000;
@@ -27,91 +21,82 @@ const salvarNotificados = (set: Set<string>) => {
   } catch {}
 };
 
-const tocarSom = () => {
-  try {
-    // Beep curto em base64 (WAV gerado)
-    const beep = "data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAA" +
-      "ABAAEAQB8AAEAfAAABAAgAZGF0YU" +
-      "hvT18AAAAAAAAAAAAAAAAAAAAAAAAA" +
-      "AAAAAAAAAAAAAAAAAAAAAAAAAAAAA" +
-      "AAAAAAAAAAAAAAAAAAA=";
-    const audio = new Audio(beep);
-    audio.volume = 1.0;
-    audio.play().catch(() => {});
-  } catch {}
-};
-
-const dispararNotificacao = (
+const disparar = async (
   nome: string,
   mensagem: string,
-  toast: (t: { kind: "success" | "warning" | "error"; text: string }) => void
+  notif: NotifSettings,
+  toast: (t: { kind: "success" | "warning" | "error"; text: string }) => void,
 ) => {
-  tocarSom();
+  // Som (respeitando autoplay)
+  if (notif.somAtivo && userHasInteracted()) {
+    void playAlertSound();
+  }
+  // Notificação do sistema
+  const enviou = await showSystemNotification({
+    title: "Agenda Digital",
+    body: `⏰ ${nome} — ${mensagem}`,
+    tag: `agenda-${nome}`,
+  });
+  // Fallback in-app sempre, garante que o aviso aparece
   toast({ kind: "warning", text: `🔔 ${nome} — ${mensagem}` });
-  if ("Notification" in window && Notification.permission === "granted") {
-    new Notification("Agenda Digital", {
-      body: `⏰ ${nome} — ${mensagem}`,
-      icon: "/favicon.ico",
-    });
+  if (!enviou && notif.somAtivo && userHasInteracted()) {
+    void playAlertSound();
   }
 };
 
 export function useNotificationScheduler(
   eventos: Evento[],
+  notif: NotifSettings,
   toast: (t: { kind: "success" | "warning" | "error"; text: string }) => void,
 ) {
   const eventosRef = useRef(eventos);
+  const notifRef = useRef(notif);
   const toastRef = useRef(toast);
   const notificadosRef = useRef<Set<string>>(new Set());
 
   useEffect(() => { notificadosRef.current = carregarNotificados(); }, []);
   useEffect(() => { eventosRef.current = eventos; }, [eventos]);
+  useEffect(() => { notifRef.current = notif; }, [notif]);
   useEffect(() => { toastRef.current = toast; }, [toast]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if ("Notification" in window && Notification.permission === "default") {
-      Notification.requestPermission();
-    }
 
     const verificar = () => {
+      const cfg = notifRef.current;
+      if (!cfg.ativadas) return;
       const agora = Date.now();
 
       for (const evento of eventosRef.current) {
-        // Notificação de lembrete antecipado
-        if (evento.lembrete && evento.lembrete !== "Sem lembrete") {
-          const offset = OFFSET_MS[evento.lembrete];
-          if (offset !== undefined) {
-            const dataHora = new Date(`${evento.data}T${evento.horaInicio}:00`);
-            if (!isNaN(dataHora.getTime())) {
-              const momentoNotificar = dataHora.getTime() - offset;
-              const chave = `${evento.id}-lembrete-${evento.lembrete}`;
-              const atraso = agora - momentoNotificar;
-              if (atraso > JANELA_ATRASO_MS && !notificadosRef.current.has(chave)) {
-                notificadosRef.current.add(chave);
-                salvarNotificados(notificadosRef.current);
-              } else if (atraso >= 0 && atraso <= JANELA_ATRASO_MS && !notificadosRef.current.has(chave)) {
-                notificadosRef.current.add(chave);
-                salvarNotificados(notificadosRef.current);
-                dispararNotificacao(evento.nome, `começa em ${evento.lembrete}`, toastRef.current);
-              }
-            }
+        const dataHora = new Date(`${evento.data}T${evento.horaInicio}:00`);
+        if (isNaN(dataHora.getTime())) continue;
+
+        // Lembrete antecipado (preferência global)
+        const offset = cfg.antecedenciaMin * 60_000;
+        if (offset > 0) {
+          const momentoNotificar = dataHora.getTime() - offset;
+          const chave = `${evento.id}-pre-${cfg.antecedenciaMin}`;
+          const atraso = agora - momentoNotificar;
+          if (atraso > JANELA_ATRASO_MS && !notificadosRef.current.has(chave)) {
+            notificadosRef.current.add(chave);
+            salvarNotificados(notificadosRef.current);
+          } else if (atraso >= 0 && atraso <= JANELA_ATRASO_MS && !notificadosRef.current.has(chave)) {
+            notificadosRef.current.add(chave);
+            salvarNotificados(notificadosRef.current);
+            void disparar(evento.nome, `começa em ${cfg.antecedenciaMin} min`, cfg, toastRef.current);
           }
         }
 
-        // Notificação na hora exata do evento
-        const dataHora = new Date(`${evento.data}T${evento.horaInicio}:00`);
-        if (!isNaN(dataHora.getTime())) {
-          const chaveExata = `${evento.id}-inicio`;
-          const atraso = agora - dataHora.getTime();
-          if (atraso > JANELA_ATRASO_MS && !notificadosRef.current.has(chaveExata)) {
-            notificadosRef.current.add(chaveExata);
-            salvarNotificados(notificadosRef.current);
-          } else if (atraso >= 0 && atraso <= JANELA_ATRASO_MS && !notificadosRef.current.has(chaveExata)) {
-            notificadosRef.current.add(chaveExata);
-            salvarNotificados(notificadosRef.current);
-            dispararNotificacao(evento.nome, "está começando agora! 🚀", toastRef.current);
-          }
+        // Início exato
+        const chaveExata = `${evento.id}-inicio`;
+        const atraso = agora - dataHora.getTime();
+        if (atraso > JANELA_ATRASO_MS && !notificadosRef.current.has(chaveExata)) {
+          notificadosRef.current.add(chaveExata);
+          salvarNotificados(notificadosRef.current);
+        } else if (atraso >= 0 && atraso <= JANELA_ATRASO_MS && !notificadosRef.current.has(chaveExata)) {
+          notificadosRef.current.add(chaveExata);
+          salvarNotificados(notificadosRef.current);
+          void disparar(evento.nome, "está começando agora! 🚀", cfg, toastRef.current);
         }
       }
     };

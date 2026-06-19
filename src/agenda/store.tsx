@@ -18,6 +18,13 @@ import type {
 const STORAGE_KEY = "agenda-digital-v1";
 
 
+export interface NotifSettings {
+  ativadas: boolean;
+  somAtivo: boolean;
+  antecedenciaMin: number; // minutos antes do evento
+  permissaoSolicitada: boolean;
+}
+
 interface State {
   usuario: Usuario;
   agendas: Agenda[];
@@ -25,6 +32,7 @@ interface State {
   tasks: Task[];
   membros: Membro[];
   comentarios: Comentario[];
+  notif: NotifSettings;
 }
 
 const initialState = (): State => {
@@ -32,7 +40,19 @@ const initialState = (): State => {
   if (typeof window !== "undefined") {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) return JSON.parse(raw) as State;
+      if (raw) {
+        const parsed = JSON.parse(raw) as State;
+        const defaultsNotif: NotifSettings = {
+          ativadas: true,
+          somAtivo: true,
+          antecedenciaMin: 15,
+          permissaoSolicitada: false,
+        };
+        return {
+          ...parsed,
+          notif: { ...defaultsNotif, ...(parsed.notif || {}) },
+        };
+      }
     } catch {
       // ignore
     }
@@ -98,6 +118,12 @@ const initialState = (): State => {
       },
     ],
     comentarios: [],
+    notif: {
+      ativadas: true,
+      somAtivo: true,
+      antecedenciaMin: 15,
+      permissaoSolicitada: false,
+    },
   };
 };
 
@@ -115,7 +141,8 @@ type Action =
   | { type: "UPDATE_MEMBRO"; membro: Membro }
   | { type: "DELETE_MEMBRO"; id: string }
   | { type: "ADD_COMENTARIO"; comentario: Comentario }
-  | { type: "JOIN_AGENDA"; agenda: Agenda; membro: Membro };
+  | { type: "JOIN_AGENDA"; agenda: Agenda; membro: Membro }
+  | { type: "SET_NOTIF"; patch: Partial<NotifSettings> };
 
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -191,6 +218,8 @@ const reducer = (state: State, action: Action): State => {
         agendas: [...state.agendas, action.agenda],
         membros: [...state.membros, action.membro],
       };
+    case "SET_NOTIF":
+      return { ...state, notif: { ...state.notif, ...action.patch } };
     default:
       return state;
   }
