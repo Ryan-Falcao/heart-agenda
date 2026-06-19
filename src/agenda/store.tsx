@@ -42,15 +42,15 @@ const initialState = (): State => {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw) as State;
+        const defaultsNotif: NotifSettings = {
+          ativadas: true,
+          somAtivo: true,
+          antecedenciaMin: 15,
+          permissaoSolicitada: false,
+        };
         return {
           ...parsed,
-          notif: {
-            ativadas: true,
-            somAtivo: true,
-            antecedenciaMin: 15,
-            permissaoSolicitada: false,
-            ...(parsed.notif || {}),
-          },
+          notif: { ...defaultsNotif, ...(parsed.notif || {}) },
         };
       }
     } catch {
