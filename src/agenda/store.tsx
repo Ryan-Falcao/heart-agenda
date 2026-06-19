@@ -129,7 +129,8 @@ type Action =
   | { type: "UPDATE_MEMBRO"; membro: Membro }
   | { type: "DELETE_MEMBRO"; id: string }
   | { type: "ADD_COMENTARIO"; comentario: Comentario }
-  | { type: "JOIN_AGENDA"; agenda: Agenda; membro: Membro };
+  | { type: "JOIN_AGENDA"; agenda: Agenda; membro: Membro }
+  | { type: "SET_NOTIF"; patch: Partial<NotifSettings> };
 
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
