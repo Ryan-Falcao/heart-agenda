@@ -18,6 +18,13 @@ import type {
 const STORAGE_KEY = "agenda-digital-v1";
 
 
+export interface NotifSettings {
+  ativadas: boolean;
+  somAtivo: boolean;
+  antecedenciaMin: number; // minutos antes do evento
+  permissaoSolicitada: boolean;
+}
+
 interface State {
   usuario: Usuario;
   agendas: Agenda[];
@@ -25,6 +32,7 @@ interface State {
   tasks: Task[];
   membros: Membro[];
   comentarios: Comentario[];
+  notif: NotifSettings;
 }
 
 const initialState = (): State => {
