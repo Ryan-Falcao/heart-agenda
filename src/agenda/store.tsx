@@ -40,7 +40,19 @@ const initialState = (): State => {
   if (typeof window !== "undefined") {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) return JSON.parse(raw) as State;
+      if (raw) {
+        const parsed = JSON.parse(raw) as State;
+        return {
+          ...parsed,
+          notif: {
+            ativadas: true,
+            somAtivo: true,
+            antecedenciaMin: 15,
+            permissaoSolicitada: false,
+            ...(parsed.notif || {}),
+          },
+        };
+      }
     } catch {
       // ignore
     }
