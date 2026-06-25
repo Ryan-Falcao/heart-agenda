@@ -14,11 +14,84 @@ export type Database = {
   }
   public: {
     Tables: {
+      friend_invite_codes: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      friendships: {
+        Row: {
+          addressee_id: string
+          created_at: string
+          id: string
+          requester_id: string
+          status: Database["public"]["Enums"]["friendship_status"]
+          updated_at: string
+        }
+        Insert: {
+          addressee_id: string
+          created_at?: string
+          id?: string
+          requester_id: string
+          status?: Database["public"]["Enums"]["friendship_status"]
+          updated_at?: string
+        }
+        Update: {
+          addressee_id?: string
+          created_at?: string
+          id?: string
+          requester_id?: string
+          status?: Database["public"]["Enums"]["friendship_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      notification_preferences: {
+        Row: {
+          minutes_before: number
+          push_enabled: boolean
+          sound_enabled: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          minutes_before?: number
+          push_enabled?: boolean
+          sound_enabled?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          minutes_before?: number
+          push_enabled?: boolean
+          sound_enabled?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
           created_at: string
           data_nascimento: string | null
+          email: string | null
           id: string
           nome: string
           sobrenome: string
@@ -28,6 +101,7 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           data_nascimento?: string | null
+          email?: string | null
           id: string
           nome?: string
           sobrenome?: string
@@ -37,6 +111,7 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           data_nascimento?: string | null
+          email?: string | null
           id?: string
           nome?: string
           sobrenome?: string
@@ -44,15 +119,164 @@ export type Database = {
         }
         Relationships: []
       }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          id: string
+          p256dh: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          p256dh: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          p256dh?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      shared_agenda_members: {
+        Row: {
+          agenda_id: string
+          joined_at: string
+          role: Database["public"]["Enums"]["agenda_role"]
+          user_id: string
+        }
+        Insert: {
+          agenda_id: string
+          joined_at?: string
+          role?: Database["public"]["Enums"]["agenda_role"]
+          user_id: string
+        }
+        Update: {
+          agenda_id?: string
+          joined_at?: string
+          role?: Database["public"]["Enums"]["agenda_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_agenda_members_agenda_id_fkey"
+            columns: ["agenda_id"]
+            isOneToOne: false
+            referencedRelation: "shared_agendas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shared_agendas: {
+        Row: {
+          color: string
+          created_at: string
+          id: string
+          name: string
+          owner_id: string
+          updated_at: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          id?: string
+          name: string
+          owner_id: string
+          updated_at?: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          id?: string
+          name?: string
+          owner_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      shared_tasks: {
+        Row: {
+          agenda_id: string
+          assigned_to: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          due_date: string | null
+          id: string
+          reminder_sent_at: string | null
+          status: Database["public"]["Enums"]["task_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          agenda_id: string
+          assigned_to?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          reminder_sent_at?: string | null
+          status?: Database["public"]["Enums"]["task_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          agenda_id?: string
+          assigned_to?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          reminder_sent_at?: string | null
+          status?: Database["public"]["Enums"]["task_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_tasks_agenda_id_fkey"
+            columns: ["agenda_id"]
+            isOneToOne: false
+            referencedRelation: "shared_agendas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      agenda_role_of: {
+        Args: { _agenda: string; _user: string }
+        Returns: Database["public"]["Enums"]["agenda_role"]
+      }
+      is_agenda_member: {
+        Args: { _agenda: string; _user: string }
+        Returns: boolean
+      }
+      is_agenda_owner: {
+        Args: { _agenda: string; _user: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      agenda_role: "owner" | "editor" | "viewer"
+      friendship_status: "pending" | "accepted" | "rejected"
+      task_status: "pending" | "in_progress" | "done"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -179,6 +403,10 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      agenda_role: ["owner", "editor", "viewer"],
+      friendship_status: ["pending", "accepted", "rejected"],
+      task_status: ["pending", "in_progress", "done"],
+    },
   },
 } as const
