@@ -50,23 +50,23 @@ export const FriendsScreen = () => {
   const handleSendEmail = async () => {
     try {
       await sendRequestByEmail(email);
-      toast("Solicitação enviada!", "success");
+      toast({ kind: "success", text: "Solicitação enviada!" });
       setEmail("");
       setShowAdd(false);
       setTab("sent");
     } catch (e: any) {
-      toast(e?.message ?? "Erro", "error");
+      toast({ kind: "error", text: e?.message ?? "Erro" });
     }
   };
   const handleAcceptCode = async () => {
     try {
       await acceptByCode(code);
-      toast("Solicitação enviada!", "success");
+      toast({ kind: "success", text: "Solicitação enviada!" });
       setCode("");
       setShowAdd(false);
       setTab("sent");
     } catch (e: any) {
-      toast(e?.message ?? "Erro", "error");
+      toast({ kind: "error", text: e?.message ?? "Erro" });
     }
   };
 
@@ -75,9 +75,9 @@ export const FriendsScreen = () => {
     const link = `${window.location.origin}/?friend=${myCode}`;
     try {
       await navigator.clipboard.writeText(link);
-      toast("Link copiado!", "success");
+      toast({ kind: "success", text: "Link copiado!" });
     } catch {
-      toast("Não foi possível copiar", "error");
+      toast({ kind: "error", text: "Não foi possível copiar" });
     }
   };
 

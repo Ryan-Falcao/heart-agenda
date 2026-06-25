@@ -19,12 +19,12 @@ export const SharedListScreen = () => {
     if (!name.trim()) return;
     try {
       const a = await createAgenda(name.trim(), color);
-      toast("Agenda criada!", "success");
+      toast({ kind: "success", text: "Agenda criada!" });
       setName("");
       setShowCreate(false);
       go({ name: "sharedDetail", id: a.id });
     } catch (e: any) {
-      toast(e?.message ?? "Erro", "error");
+      toast({ kind: "error", text: e?.message ?? "Erro" });
     }
   };
 
