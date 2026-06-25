@@ -97,6 +97,7 @@ export const AppRoot = () => {
           <StoreProvider>
             <NavProvider>
               <AuthBridge />
+              <InviteHandler />
               <NotificationScheduler />
               <div className="relative mx-auto min-h-screen w-full max-w-[390px] bg-white">
                 <Router />
