@@ -8,11 +8,15 @@ import { AgendaScreen } from "./AgendaScreen";
 import { SharedAgendaScreen } from "./SharedAgendaScreen";
 import { CalendarScreen } from "./CalendarScreen";
 import { ProfileScreen } from "./ProfileScreen";
+import { FriendsScreen } from "./FriendsScreen";
+import { SharedListScreen } from "./SharedListScreen";
+import { SharedAgendaDetailScreen } from "./SharedAgendaDetailScreen";
 import { BottomNav } from "./BottomNav";
 import { Toast } from "./ui";
 import { useNotificationScheduler } from "./useNotificationScheduler";
 import { NotificationPermissionPrompt } from "./NotificationPermissionPrompt";
 import { AuthProvider, useAuth } from "./auth/AuthContext";
+import { useFriendInviteHandler } from "./hooks/useFriendInviteHandler";
 
 const NotificationScheduler = () => {
   const { state, toast } = useStore();
@@ -48,11 +52,22 @@ const Router = () => {
       return <CalendarScreen />;
     case "profile":
       return <ProfileScreen />;
+    case "friends":
+      return <FriendsScreen />;
+    case "sharedList":
+      return <SharedListScreen />;
     case "agenda":
       return <AgendaScreen id={screen.id} />;
     case "shared":
       return <SharedAgendaScreen id={screen.id} />;
+    case "sharedDetail":
+      return <SharedAgendaDetailScreen id={screen.id} />;
   }
+};
+
+const InviteHandler = () => {
+  useFriendInviteHandler();
+  return null;
 };
 
 const AuthGate = ({ children }: { children: React.ReactNode }) => {
