@@ -5,8 +5,11 @@ export type Screen =
   | { name: "calendar" }
   | { name: "search" }
   | { name: "profile" }
+  | { name: "friends" }
+  | { name: "sharedList" }
   | { name: "agenda"; id: string }
-  | { name: "shared"; id: string };
+  | { name: "shared"; id: string }
+  | { name: "sharedDetail"; id: string };
 
 interface NavCtx {
   screen: Screen;
@@ -25,7 +28,7 @@ export const NavProvider = ({ children }: { children: ReactNode }) => {
       // for tabs, reset to single
       ["home", "calendar", "search", "profile"].includes(s.name)
         ? [s]
-        : [...st, s],
+        : [...st, s as Screen],
     );
   const back = () =>
     setStack((st) => (st.length > 1 ? st.slice(0, -1) : st));
