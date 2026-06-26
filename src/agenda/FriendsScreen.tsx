@@ -38,7 +38,7 @@ export const FriendsScreen = () => {
   const [tab, setTab] = useState<Tab>("friends");
   const [showAdd, setShowAdd] = useState(false);
   const [showQR, setShowQR] = useState(false);
-  const [showScan, setShowScan] = useState(false);
+  const [qrMode, setQrMode] = useState<"mine" | "scan">("mine");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [qrUrl, setQrUrl] = useState<string | null>(null);
