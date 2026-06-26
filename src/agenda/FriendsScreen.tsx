@@ -84,6 +84,25 @@ export const FriendsScreen = () => {
     }
   };
 
+  const handleScanResult = async (text: string) => {
+    setShowScan(false);
+    let scanned = text.trim();
+    try {
+      const url = new URL(scanned);
+      const fc = url.searchParams.get("friend");
+      if (fc) scanned = fc;
+    } catch {
+      // not a URL, use raw text as code
+    }
+    try {
+      await acceptByCode(scanned);
+      toast({ kind: "success", text: "Solicitação enviada!" });
+      setTab("sent");
+    } catch (e: any) {
+      toast({ kind: "error", text: e?.message ?? "QR inválido" });
+    }
+  };
+
   const list =
     tab === "friends" ? accepted : tab === "received" ? received : sent;
 
