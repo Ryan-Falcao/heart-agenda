@@ -63,7 +63,7 @@ export function useSharedAgendas() {
   useEffect(() => {
     if (!user) return;
     const ch = supabase
-      .channel("shared_agendas:" + user.id)
+      .channel(`shared_agendas-${user.id}-${Date.now()}`)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "shared_agenda_members", filter: `user_id=eq.${user.id}` },
