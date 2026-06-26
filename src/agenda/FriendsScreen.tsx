@@ -272,38 +272,64 @@ export const FriendsScreen = () => {
         </div>
       </Modal>
 
-      {/* QR modal */}
-      <Modal open={showQR} onClose={() => setShowQR(false)} title="Meu convite">
-        <div className="flex flex-col items-center gap-3">
-          {qrUrl ? (
-            <img src={qrUrl} alt="QR code" className="h-60 w-60" />
+      {/* QR modal: mostrar meu QR ou ler de outro */}
+      <Modal open={showQR} onClose={() => setShowQR(false)} title="QR code">
+        <div className="space-y-4">
+          <div className="flex rounded-full bg-gray-100 p-1 text-xs font-medium">
+            <button
+              onClick={() => setQrMode("mine")}
+              className={`flex-1 rounded-full py-1.5 transition ${
+                qrMode === "mine"
+                  ? "bg-white text-[#1A1A1A] shadow-sm"
+                  : "text-gray-500"
+              }`}
+            >
+              Meu QR
+            </button>
+            <button
+              onClick={() => setQrMode("scan")}
+              className={`flex-1 rounded-full py-1.5 transition ${
+                qrMode === "scan"
+                  ? "bg-white text-[#1A1A1A] shadow-sm"
+                  : "text-gray-500"
+              }`}
+            >
+              Ler QR
+            </button>
+          </div>
+
+          {qrMode === "mine" ? (
+            <div className="flex flex-col items-center gap-3">
+              {qrUrl ? (
+                <img src={qrUrl} alt="QR code" className="h-60 w-60" />
+              ) : (
+                <Spinner />
+              )}
+              {myCode && (
+                <>
+                  <div className="rounded-lg bg-gray-100 px-4 py-2 text-lg font-bold tracking-widest">
+                    {myCode}
+                  </div>
+                  <button
+                    onClick={copyMyCode}
+                    className="flex items-center gap-2 rounded-full bg-[#2563EB] px-5 py-2 text-sm font-semibold text-white"
+                  >
+                    <Copy size={16} /> Copiar link de convite
+                  </button>
+                  <p className="px-4 text-center text-xs text-gray-500">
+                    Compartilhe o QR ou o link para adicionar amigos automaticamente.
+                  </p>
+                </>
+              )}
+            </div>
           ) : (
-            <Spinner />
-          )}
-          {myCode && (
-            <>
-              <div className="rounded-lg bg-gray-100 px-4 py-2 text-lg font-bold tracking-widest">
-                {myCode}
-              </div>
-              <button
-                onClick={copyMyCode}
-                className="flex items-center gap-2 rounded-full bg-[#2563EB] px-5 py-2 text-sm font-semibold text-white"
-              >
-                <Copy size={16} /> Copiar link de convite
-              </button>
-              <p className="px-4 text-center text-xs text-gray-500">
-                Compartilhe o QR ou o link para adicionar amigos automaticamente.
-              </p>
-            </>
+            <QRScannerView
+              active={showQR && qrMode === "scan"}
+              onResult={handleScanResult}
+            />
           )}
         </div>
       </Modal>
-
-      <QRScannerModal
-        open={showScan}
-        onClose={() => setShowScan(false)}
-        onResult={handleScanResult}
-      />
     </div>
   );
 };
