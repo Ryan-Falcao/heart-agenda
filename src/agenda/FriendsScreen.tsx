@@ -85,7 +85,7 @@ export const FriendsScreen = () => {
   };
 
   const handleScanResult = async (text: string) => {
-    setShowScan(false);
+    setShowQR(false);
     let scanned = text.trim();
     try {
       const url = new URL(scanned);
