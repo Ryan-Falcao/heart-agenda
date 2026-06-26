@@ -114,16 +114,12 @@ export const FriendsScreen = () => {
         </button>
         <h1 className="flex-1 text-base font-bold text-[#1A1A1A]">Amigos</h1>
         <button
-          onClick={() => setShowScan(true)}
+          onClick={() => {
+            setQrMode("mine");
+            setShowQR(true);
+          }}
           className="rounded-full p-2 active:bg-gray-100"
-          aria-label="Ler QR code"
-        >
-          <ScanLine size={20} />
-        </button>
-        <button
-          onClick={() => setShowQR(true)}
-          className="rounded-full p-2 active:bg-gray-100"
-          aria-label="Meu QR code"
+          aria-label="QR code"
         >
           <QrCode size={20} />
         </button>
