@@ -96,12 +96,28 @@ export function useFriendships() {
 
   useEffect(() => {
     if (!user) return;
+    const handleChange = () => fetchAll();
     const ch = supabase
-      .channel("friendships:" + user.id)
+      .channel(`friendships-changes-${user.id}-${Date.now()}`)
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "friendships" },
-        () => fetchAll(),
+        {
+          event: "*",
+          schema: "public",
+          table: "friendships",
+          filter: `requester_id=eq.${user.id}`,
+        },
+        handleChange,
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "friendships",
+          filter: `addressee_id=eq.${user.id}`,
+        },
+        handleChange,
       )
       .subscribe();
     return () => {
