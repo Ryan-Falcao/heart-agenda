@@ -11,7 +11,7 @@ import {
   X,
 } from "lucide-react";
 import QRCode from "qrcode";
-import { QRScannerModal } from "./QRScannerModal";
+import { QRScannerView } from "./QRScannerModal";
 import { useNav } from "./nav";
 import { useStore } from "./store";
 import { useFriendships } from "./hooks/useFriendships";
