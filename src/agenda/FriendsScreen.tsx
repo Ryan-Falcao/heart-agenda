@@ -5,11 +5,13 @@ import {
   Copy,
   Mail,
   QrCode,
+  ScanLine,
   Trash2,
   UserPlus,
   X,
 } from "lucide-react";
 import QRCode from "qrcode";
+import { QRScannerModal } from "./QRScannerModal";
 import { useNav } from "./nav";
 import { useStore } from "./store";
 import { useFriendships } from "./hooks/useFriendships";
