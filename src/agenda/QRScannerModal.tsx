@@ -1,22 +1,21 @@
 import { useEffect, useRef, useState } from "react";
 import { BrowserQRCodeReader, IScannerControls } from "@zxing/browser";
-import { Camera, X } from "lucide-react";
-import { Modal, Spinner } from "./ui";
+import { Camera } from "lucide-react";
+import { Spinner } from "./ui";
 
-interface Props {
-  open: boolean;
-  onClose: () => void;
+interface ViewProps {
+  active: boolean;
   onResult: (text: string) => void;
 }
 
-export const QRScannerModal = ({ open, onClose, onResult }: Props) => {
+export const QRScannerView = ({ active, onResult }: ViewProps) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const controlsRef = useRef<IScannerControls | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [starting, setStarting] = useState(true);
 
   useEffect(() => {
-    if (!open) return;
+    if (!active) return;
     let cancelled = false;
     setError(null);
     setStarting(true);
@@ -63,41 +62,33 @@ export const QRScannerModal = ({ open, onClose, onResult }: Props) => {
       controlsRef.current?.stop();
       controlsRef.current = null;
     };
-  }, [open, onResult]);
+  }, [active, onResult]);
 
   return (
-    <Modal open={open} onClose={onClose} title="Ler QR code">
-      <div className="flex flex-col items-center gap-3">
-        <div className="relative aspect-square w-full max-w-xs overflow-hidden rounded-2xl bg-black">
-          <video
-            ref={videoRef}
-            className="h-full w-full object-cover"
-            playsInline
-            muted
-          />
-          {starting && !error && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-              <Spinner />
-            </div>
-          )}
-          {!starting && !error && (
-            <div className="pointer-events-none absolute inset-6 rounded-xl border-2 border-white/80" />
-          )}
-        </div>
-        {error ? (
-          <p className="px-4 text-center text-sm text-red-500">{error}</p>
-        ) : (
-          <p className="flex items-center gap-2 text-xs text-gray-500">
-            <Camera size={14} /> Aponte para o QR code do amigo
-          </p>
+    <div className="flex flex-col items-center gap-3">
+      <div className="relative aspect-square w-full max-w-xs overflow-hidden rounded-2xl bg-black">
+        <video
+          ref={videoRef}
+          className="h-full w-full object-cover"
+          playsInline
+          muted
+        />
+        {starting && !error && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+            <Spinner />
+          </div>
         )}
-        <button
-          onClick={onClose}
-          className="flex items-center gap-2 rounded-full bg-gray-100 px-5 py-2 text-sm font-semibold text-gray-700"
-        >
-          <X size={16} /> Cancelar
-        </button>
+        {!starting && !error && (
+          <div className="pointer-events-none absolute inset-6 rounded-xl border-2 border-white/80" />
+        )}
       </div>
-    </Modal>
+      {error ? (
+        <p className="px-4 text-center text-sm text-red-500">{error}</p>
+      ) : (
+        <p className="flex items-center gap-2 text-xs text-gray-500">
+          <Camera size={14} /> Aponte para o QR code do amigo
+        </p>
+      )}
+    </div>
   );
 };
