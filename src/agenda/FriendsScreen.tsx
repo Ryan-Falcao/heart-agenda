@@ -5,7 +5,6 @@ import {
   Copy,
   Mail,
   QrCode,
-  ScanLine,
   Trash2,
   UserPlus,
   X,
