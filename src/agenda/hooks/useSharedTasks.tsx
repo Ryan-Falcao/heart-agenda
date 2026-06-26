@@ -59,7 +59,7 @@ export function useSharedTasks(agendaId: string | null) {
   useEffect(() => {
     if (!agendaId) return;
     const ch = supabase
-      .channel("shared_tasks:" + agendaId)
+      .channel(`shared_tasks-${agendaId}-${Date.now()}`)
       .on(
         "postgres_changes",
         {
