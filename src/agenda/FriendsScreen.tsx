@@ -302,6 +302,12 @@ export const FriendsScreen = () => {
           )}
         </div>
       </Modal>
+
+      <QRScannerModal
+        open={showScan}
+        onClose={() => setShowScan(false)}
+        onResult={handleScanResult}
+      />
     </div>
   );
 };
