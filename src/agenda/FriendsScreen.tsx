@@ -5,11 +5,13 @@ import {
   Copy,
   Mail,
   QrCode,
+  ScanLine,
   Trash2,
   UserPlus,
   X,
 } from "lucide-react";
 import QRCode from "qrcode";
+import { QRScannerModal } from "./QRScannerModal";
 import { useNav } from "./nav";
 import { useStore } from "./store";
 import { useFriendships } from "./hooks/useFriendships";
@@ -36,6 +38,7 @@ export const FriendsScreen = () => {
   const [tab, setTab] = useState<Tab>("friends");
   const [showAdd, setShowAdd] = useState(false);
   const [showQR, setShowQR] = useState(false);
+  const [showScan, setShowScan] = useState(false);
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [qrUrl, setQrUrl] = useState<string | null>(null);
@@ -81,6 +84,25 @@ export const FriendsScreen = () => {
     }
   };
 
+  const handleScanResult = async (text: string) => {
+    setShowScan(false);
+    let scanned = text.trim();
+    try {
+      const url = new URL(scanned);
+      const fc = url.searchParams.get("friend");
+      if (fc) scanned = fc;
+    } catch {
+      // not a URL, use raw text as code
+    }
+    try {
+      await acceptByCode(scanned);
+      toast({ kind: "success", text: "Solicitação enviada!" });
+      setTab("sent");
+    } catch (e: any) {
+      toast({ kind: "error", text: e?.message ?? "QR inválido" });
+    }
+  };
+
   const list =
     tab === "friends" ? accepted : tab === "received" ? received : sent;
 
@@ -91,6 +113,13 @@ export const FriendsScreen = () => {
           <ArrowLeft size={22} />
         </button>
         <h1 className="flex-1 text-base font-bold text-[#1A1A1A]">Amigos</h1>
+        <button
+          onClick={() => setShowScan(true)}
+          className="rounded-full p-2 active:bg-gray-100"
+          aria-label="Ler QR code"
+        >
+          <ScanLine size={20} />
+        </button>
         <button
           onClick={() => setShowQR(true)}
           className="rounded-full p-2 active:bg-gray-100"
@@ -273,6 +302,12 @@ export const FriendsScreen = () => {
           )}
         </div>
       </Modal>
+
+      <QRScannerModal
+        open={showScan}
+        onClose={() => setShowScan(false)}
+        onResult={handleScanResult}
+      />
     </div>
   );
 };
