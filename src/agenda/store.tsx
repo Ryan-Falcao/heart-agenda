@@ -137,13 +137,15 @@ type Action =
   | { type: "ADD_TASK"; task: Task }
   | { type: "UPDATE_TASK"; task: Task }
   | { type: "TOGGLE_TASK"; id: string }
+  | { type: "DELETE_TASK"; id: string }
   | { type: "ADD_MEMBRO"; membro: Membro }
   | { type: "UPDATE_MEMBRO"; membro: Membro }
   | { type: "DELETE_MEMBRO"; id: string }
   | { type: "ADD_COMENTARIO"; comentario: Comentario }
   | { type: "JOIN_AGENDA"; agenda: Agenda; membro: Membro }
   | { type: "SET_NOTIF"; patch: Partial<NotifSettings> }
-  | { type: "SET_USUARIO"; usuario: Usuario };
+  | { type: "SET_USUARIO"; usuario: Usuario }
+  | { type: "PURGE_EXPIRED"; now: string };
 
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
