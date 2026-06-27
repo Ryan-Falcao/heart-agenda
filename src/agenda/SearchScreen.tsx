@@ -12,7 +12,13 @@ const formatDate = (s: string) => {
 
 export const SearchScreen = () => {
   const { state } = useStore();
-  const { go, back } = useNav();
+  const { go } = useNav();
+  const [q, setQ] = useState("");
+
+  const handleCancel = () => {
+    setQ("");
+    go({ name: "home" });
+  };
   const [q, setQ] = useState("");
 
   const ql = q.trim().toLowerCase();
