@@ -218,83 +218,88 @@ export const FriendsScreen = () => {
         </ul>
       )}
 
-      {/* Add modal */}
-      <Modal open={showAdd} onClose={() => setShowAdd(false)} title="Adicionar amigo">
-        <div className="space-y-5">
-          <div>
-            <label className="mb-1 block text-xs font-medium text-gray-600">
-              Por e-mail
-            </label>
-            <div className="flex gap-2">
-              <div className="flex flex-1 items-center gap-2 rounded-xl border border-gray-200 px-3">
-                <Mail size={16} className="text-gray-400" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="amigo@email.com"
-                  className="flex-1 bg-transparent py-2 text-sm outline-none"
-                />
-              </div>
-              <button
-                onClick={handleSendEmail}
-                disabled={!email.trim()}
-                className="rounded-xl bg-[#2563EB] px-4 text-sm font-semibold text-white disabled:opacity-40"
-              >
-                Enviar
-              </button>
-            </div>
-          </div>
-          <div className="border-t border-gray-100 pt-4">
-            <label className="mb-1 block text-xs font-medium text-gray-600">
-              Por código de convite
-            </label>
-            <div className="flex gap-2">
-              <input
-                value={code}
-                onChange={(e) => setCode(e.target.value.toUpperCase())}
-                placeholder="EX: AB12CD34"
-                className="flex-1 rounded-xl border border-gray-200 px-3 py-2 text-sm uppercase tracking-wider outline-none"
-              />
-              <button
-                onClick={handleAcceptCode}
-                disabled={!code.trim()}
-                className="rounded-xl bg-[#1E3A8A] px-4 text-sm font-semibold text-white disabled:opacity-40"
-              >
-                Adicionar
-              </button>
-            </div>
-          </div>
-        </div>
-      </Modal>
-
-      {/* QR modal: mostrar meu QR ou ler de outro */}
-      <Modal open={showQR} onClose={() => setShowQR(false)} title="QR code">
+      {/* Add modal: manual / meu QR / ler QR */}
+      <Modal
+        open={showAdd}
+        onClose={() => {
+          setShowAdd(false);
+          setAddMode("manual");
+        }}
+        title="Adicionar amigo"
+      >
         <div className="space-y-4">
           <div className="flex rounded-full bg-gray-100 p-1 text-xs font-medium">
-            <button
-              onClick={() => setQrMode("mine")}
-              className={`flex-1 rounded-full py-1.5 transition ${
-                qrMode === "mine"
-                  ? "bg-white text-[#1A1A1A] shadow-sm"
-                  : "text-gray-500"
-              }`}
-            >
-              Meu QR
-            </button>
-            <button
-              onClick={() => setQrMode("scan")}
-              className={`flex-1 rounded-full py-1.5 transition ${
-                qrMode === "scan"
-                  ? "bg-white text-[#1A1A1A] shadow-sm"
-                  : "text-gray-500"
-              }`}
-            >
-              Ler QR
-            </button>
+            {(
+              [
+                { k: "manual", label: "Manual" },
+                { k: "mine", label: "Meu QR" },
+                { k: "scan", label: "Ler QR" },
+              ] as { k: typeof addMode; label: string }[]
+            ).map((m) => (
+              <button
+                key={m.k}
+                onClick={() => setAddMode(m.k)}
+                className={`flex-1 rounded-full py-1.5 transition ${
+                  addMode === m.k
+                    ? "bg-white text-[#1A1A1A] shadow-sm"
+                    : "text-gray-500"
+                }`}
+              >
+                {m.label}
+              </button>
+            ))}
           </div>
 
-          {qrMode === "mine" ? (
+          {addMode === "manual" && (
+            <div className="space-y-5">
+              <div>
+                <label className="mb-1 block text-xs font-medium text-gray-600">
+                  Por e-mail
+                </label>
+                <div className="flex gap-2">
+                  <div className="flex flex-1 items-center gap-2 rounded-xl border border-gray-200 px-3">
+                    <Mail size={16} className="text-gray-400" />
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="amigo@email.com"
+                      className="flex-1 bg-transparent py-2 text-sm outline-none"
+                    />
+                  </div>
+                  <button
+                    onClick={handleSendEmail}
+                    disabled={!email.trim()}
+                    className="rounded-xl bg-[#2563EB] px-4 text-sm font-semibold text-white disabled:opacity-40"
+                  >
+                    Enviar
+                  </button>
+                </div>
+              </div>
+              <div className="border-t border-gray-100 pt-4">
+                <label className="mb-1 block text-xs font-medium text-gray-600">
+                  Por código de convite
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    value={code}
+                    onChange={(e) => setCode(e.target.value.toUpperCase())}
+                    placeholder="EX: AB12CD34"
+                    className="flex-1 rounded-xl border border-gray-200 px-3 py-2 text-sm uppercase tracking-wider outline-none"
+                  />
+                  <button
+                    onClick={handleAcceptCode}
+                    disabled={!code.trim()}
+                    className="rounded-xl bg-[#1E3A8A] px-4 text-sm font-semibold text-white disabled:opacity-40"
+                  >
+                    Adicionar
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {addMode === "mine" && (
             <div className="flex flex-col items-center gap-3">
               {qrUrl ? (
                 <img src={qrUrl} alt="QR code" className="h-60 w-60" />
@@ -318,9 +323,11 @@ export const FriendsScreen = () => {
                 </>
               )}
             </div>
-          ) : (
+          )}
+
+          {addMode === "scan" && (
             <QRScannerView
-              active={showQR && qrMode === "scan"}
+              active={showAdd && addMode === "scan"}
               onResult={handleScanResult}
             />
           )}
@@ -329,3 +336,4 @@ export const FriendsScreen = () => {
     </div>
   );
 };
+
