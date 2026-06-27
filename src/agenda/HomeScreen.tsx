@@ -12,6 +12,7 @@ import { AgendaCard } from "./AgendaCard";
 import { SectionTitle } from "./ui";
 import { CreateAgendaModal } from "./CreateAgendaModal";
 import { JoinAgendaModal } from "./JoinAgendaModal";
+import { NotificationsPanel } from "./NotificationsPanel";
 
 const MONTHS = [
   "janeiro",
