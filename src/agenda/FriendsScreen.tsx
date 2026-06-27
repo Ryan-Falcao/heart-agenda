@@ -84,7 +84,8 @@ export const FriendsScreen = () => {
   };
 
   const handleScanResult = async (text: string) => {
-    setShowQR(false);
+    setShowAdd(false);
+    setAddMode("manual");
     let scanned = text.trim();
     try {
       const url = new URL(scanned);
@@ -102,6 +103,11 @@ export const FriendsScreen = () => {
     }
   };
 
+  const openAdd = () => {
+    setAddMode("manual");
+    setShowAdd(true);
+  };
+
   const list =
     tab === "friends" ? accepted : tab === "received" ? received : sent;
 
@@ -113,23 +119,14 @@ export const FriendsScreen = () => {
         </button>
         <h1 className="flex-1 text-base font-bold text-[#1A1A1A]">Amigos</h1>
         <button
-          onClick={() => {
-            setQrMode("mine");
-            setShowQR(true);
-          }}
-          className="rounded-full p-2 active:bg-gray-100"
-          aria-label="QR code"
-        >
-          <QrCode size={20} />
-        </button>
-        <button
-          onClick={() => setShowAdd(true)}
+          onClick={openAdd}
           className="flex h-9 w-9 items-center justify-center rounded-full bg-[#2563EB] text-white"
           aria-label="Adicionar amigo"
         >
           <UserPlus size={18} />
         </button>
       </header>
+
 
       <div className="mx-4 mb-3 flex rounded-full bg-gray-100 p-1 text-xs font-medium">
         {(
