@@ -36,18 +36,18 @@ export const FriendsScreen = () => {
 
   const [tab, setTab] = useState<Tab>("friends");
   const [showAdd, setShowAdd] = useState(false);
-  const [showQR, setShowQR] = useState(false);
-  const [qrMode, setQrMode] = useState<"mine" | "scan">("mine");
+  const [addMode, setAddMode] = useState<"manual" | "mine" | "scan">("manual");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [qrUrl, setQrUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    if (showQR && myCode) {
+    if (showAdd && addMode === "mine" && myCode) {
       const link = `${window.location.origin}/?friend=${myCode}`;
       QRCode.toDataURL(link, { width: 240, margin: 1 }).then(setQrUrl).catch(() => {});
     }
-  }, [showQR, myCode]);
+  }, [showAdd, addMode, myCode]);
+
 
   const handleSendEmail = async () => {
     try {
