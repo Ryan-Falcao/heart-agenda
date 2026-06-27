@@ -12,6 +12,7 @@ import { AgendaCard } from "./AgendaCard";
 import { SectionTitle } from "./ui";
 import { CreateAgendaModal } from "./CreateAgendaModal";
 import { JoinAgendaModal } from "./JoinAgendaModal";
+import { NotificationsPanel } from "./NotificationsPanel";
 
 const MONTHS = [
   "janeiro",
@@ -33,6 +34,7 @@ export const HomeScreen = () => {
   const { go } = useNav();
   const [showCreate, setShowCreate] = useState(false);
   const [showJoin, setShowJoin] = useState(false);
+  const [showNotif, setShowNotif] = useState(false);
 
   const todayStr = useMemo(() => {
     const d = new Date();
@@ -74,7 +76,11 @@ export const HomeScreen = () => {
           >
             <Search size={22} color="#1A1A1A" />
           </button>
-          <button className="relative flex h-10 w-10 items-center justify-center rounded-full active:bg-gray-100">
+          <button
+            onClick={() => setShowNotif(true)}
+            aria-label="Notificações"
+            className="relative flex h-10 w-10 items-center justify-center rounded-full active:bg-gray-100"
+          >
             <Bell size={22} color="#1A1A1A" />
             {hasNotifications && (
               <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500" />
@@ -178,6 +184,7 @@ export const HomeScreen = () => {
         onClose={() => setShowCreate(false)}
       />
       <JoinAgendaModal open={showJoin} onClose={() => setShowJoin(false)} />
+      <NotificationsPanel open={showNotif} onClose={() => setShowNotif(false)} />
     </div>
   );
 };

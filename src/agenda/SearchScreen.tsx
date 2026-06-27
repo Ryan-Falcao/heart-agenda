@@ -12,8 +12,13 @@ const formatDate = (s: string) => {
 
 export const SearchScreen = () => {
   const { state } = useStore();
-  const { go, back } = useNav();
+  const { go } = useNav();
   const [q, setQ] = useState("");
+
+  const handleCancel = () => {
+    setQ("");
+    go({ name: "home" });
+  };
 
   const ql = q.trim().toLowerCase();
 
@@ -40,7 +45,7 @@ export const SearchScreen = () => {
           className="flex-1 rounded-xl bg-gray-100 px-4 py-2.5 text-sm outline-none placeholder:text-gray-400 focus:bg-gray-50"
         />
         <button
-          onClick={back}
+          onClick={handleCancel}
           className="text-sm font-medium text-[#2563EB]"
         >
           Cancelar

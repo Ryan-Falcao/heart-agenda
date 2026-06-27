@@ -137,13 +137,15 @@ type Action =
   | { type: "ADD_TASK"; task: Task }
   | { type: "UPDATE_TASK"; task: Task }
   | { type: "TOGGLE_TASK"; id: string }
+  | { type: "DELETE_TASK"; id: string }
   | { type: "ADD_MEMBRO"; membro: Membro }
   | { type: "UPDATE_MEMBRO"; membro: Membro }
   | { type: "DELETE_MEMBRO"; id: string }
   | { type: "ADD_COMENTARIO"; comentario: Comentario }
   | { type: "JOIN_AGENDA"; agenda: Agenda; membro: Membro }
   | { type: "SET_NOTIF"; patch: Partial<NotifSettings> }
-  | { type: "SET_USUARIO"; usuario: Usuario };
+  | { type: "SET_USUARIO"; usuario: Usuario }
+  | { type: "PURGE_EXPIRED"; now: string };
 
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -196,6 +198,25 @@ const reducer = (state: State, action: Action): State => {
           t.id === action.id ? { ...t, concluida: !t.concluida } : t,
         ),
       };
+    case "DELETE_TASK":
+      return {
+        ...state,
+        tasks: state.tasks.filter((t) => t.id !== action.id),
+      };
+    case "PURGE_EXPIRED": {
+      const nowMs = new Date(action.now).getTime();
+      const eventos = state.eventos.filter((e) => {
+        if (e.repeticao && e.repeticao !== "Não repete") return true;
+        const end = new Date(`${e.data}T${e.horaFim || e.horaInicio || "23:59"}`).getTime();
+        return Number.isNaN(end) ? true : end >= nowMs;
+      });
+      const tasks = state.tasks.filter((t) => {
+        if (!t.prazo) return true;
+        const end = new Date(`${t.prazo}T23:59`).getTime();
+        return Number.isNaN(end) ? true : end >= nowMs;
+      });
+      return { ...state, eventos, tasks };
+    }
     case "ADD_MEMBRO":
       return { ...state, membros: [...state.membros, action.membro] };
     case "UPDATE_MEMBRO":

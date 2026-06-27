@@ -1,11 +1,10 @@
-import { CalendarDays, House, Share2, User, Users } from "lucide-react";
+import { CalendarDays, House, User, Users } from "lucide-react";
 import { useNav, type Screen } from "./nav";
 
 const items: { name: Screen["name"]; label: string; icon: typeof House }[] = [
   { name: "home", label: "Home", icon: House },
   { name: "calendar", label: "Agenda", icon: CalendarDays },
   { name: "friends", label: "Amigos", icon: Users },
-  { name: "sharedList", label: "Grupos", icon: Share2 },
   { name: "profile", label: "Perfil", icon: User },
 ];
 
