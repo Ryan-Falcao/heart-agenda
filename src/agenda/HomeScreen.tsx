@@ -76,7 +76,11 @@ export const HomeScreen = () => {
           >
             <Search size={22} color="#1A1A1A" />
           </button>
-          <button className="relative flex h-10 w-10 items-center justify-center rounded-full active:bg-gray-100">
+          <button
+            onClick={() => setShowNotif(true)}
+            aria-label="Notificações"
+            className="relative flex h-10 w-10 items-center justify-center rounded-full active:bg-gray-100"
+          >
             <Bell size={22} color="#1A1A1A" />
             {hasNotifications && (
               <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500" />
