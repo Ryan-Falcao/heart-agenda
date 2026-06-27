@@ -19,7 +19,6 @@ export const SearchScreen = () => {
     setQ("");
     go({ name: "home" });
   };
-  const [q, setQ] = useState("");
 
   const ql = q.trim().toLowerCase();
 
