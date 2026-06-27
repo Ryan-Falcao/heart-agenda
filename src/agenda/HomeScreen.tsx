@@ -184,6 +184,7 @@ export const HomeScreen = () => {
         onClose={() => setShowCreate(false)}
       />
       <JoinAgendaModal open={showJoin} onClose={() => setShowJoin(false)} />
+      <NotificationsPanel open={showNotif} onClose={() => setShowNotif(false)} />
     </div>
   );
 };
