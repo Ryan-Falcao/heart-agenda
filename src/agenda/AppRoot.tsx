@@ -19,8 +19,15 @@ import { AuthProvider, useAuth } from "./auth/AuthContext";
 import { useFriendInviteHandler } from "./hooks/useFriendInviteHandler";
 
 const NotificationScheduler = () => {
-  const { state, toast } = useStore();
+  const { state, toast, dispatch } = useStore();
   useNotificationScheduler(state.eventos, state.notif, toast);
+  useEffect(() => {
+    const run = () =>
+      dispatch({ type: "PURGE_EXPIRED", now: new Date().toISOString() });
+    run();
+    const id = window.setInterval(run, 60_000);
+    return () => window.clearInterval(id);
+  }, [dispatch]);
   return null;
 };
 
