@@ -34,6 +34,7 @@ export const HomeScreen = () => {
   const { go } = useNav();
   const [showCreate, setShowCreate] = useState(false);
   const [showJoin, setShowJoin] = useState(false);
+  const [showNotif, setShowNotif] = useState(false);
 
   const todayStr = useMemo(() => {
     const d = new Date();
