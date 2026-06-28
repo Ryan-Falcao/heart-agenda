@@ -46,6 +46,10 @@ export const SharedListScreen = () => {
         </button>
       </header>
 
+      <p className="mx-4 mb-3 rounded-xl bg-blue-50 px-3 py-2 text-[11px] text-blue-700">
+        Quando alguém te adicionar a uma agenda, ela aparecerá aqui automaticamente.
+      </p>
+
       {loading ? (
         <Spinner />
       ) : agendas.length === 0 ? (

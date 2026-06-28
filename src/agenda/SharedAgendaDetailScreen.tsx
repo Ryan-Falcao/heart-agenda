@@ -185,6 +185,15 @@ export const SharedAgendaDetailScreen = ({ id }: { id: string }) => {
                   : "Visualizador"}
             </div>
           </div>
+          {canEdit && (
+            <button
+              onClick={() => setShowInvite(true)}
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-white/20 text-white"
+              aria-label="Convidar amigos"
+            >
+              <UserPlus size={16} />
+            </button>
+          )}
           <button
             onClick={() => setShowMembers(true)}
             className="flex h-9 items-center gap-1 rounded-full bg-white/20 px-3 text-xs font-semibold"
