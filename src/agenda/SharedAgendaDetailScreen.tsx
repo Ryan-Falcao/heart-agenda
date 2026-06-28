@@ -201,7 +201,7 @@ export const SharedAgendaDetailScreen = ({ id }: { id: string }) => {
       </header>
 
       <section className="px-4 pt-4">
-        <div className="mb-2 flex items-center justify-between">
+        <div className="mb-3 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-[#1A1A1A]">Tarefas</h2>
           {canEdit && (
             <button
@@ -215,117 +215,162 @@ export const SharedAgendaDetailScreen = ({ id }: { id: string }) => {
 
         {loading ? (
           <Spinner />
-        ) : tasks.length === 0 ? (
-          <div className="py-10 text-center text-sm text-gray-400">
-            Nenhuma tarefa ainda.
-          </div>
         ) : (
-          <ul className="flex flex-col gap-2">
-            {tasks.map((t) => {
-              const assignee = members.find(
-                (m) => m.user_id === t.assigned_to,
-              );
-              const name = assignee
-                ? `${assignee.profile?.nome ?? ""} ${assignee.profile?.sobrenome ?? ""}`.trim() ||
-                  "Membro"
-                : null;
-              const due = t.due_date ? new Date(t.due_date) : null;
+          <div className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2">
+            {(["pending", "in_progress", "done"] as const).map((col) => {
+              const colTasks = tasks.filter((t) => t.status === col);
+              const color = STATUS_COLOR[col];
               return (
-                <li
-                  key={t.id}
-                  className="rounded-2xl border border-gray-100 bg-white p-3"
+                <div
+                  key={col}
+                  className="flex w-[78%] flex-shrink-0 snap-start flex-col rounded-2xl bg-[#F3F4F6] p-2"
                 >
-                  <div className="flex items-start gap-3">
-                    <button
-                      onClick={() => toggleDone(t)}
-                      disabled={!canEdit}
-                      className="mt-0.5 flex h-6 w-6 items-center justify-center rounded-full border-2"
-                      style={{
-                        borderColor: STATUS_COLOR[t.status],
-                        background:
-                          t.status === "done" ? STATUS_COLOR[t.status] : "transparent",
-                      }}
-                      aria-label="Concluir"
-                    >
-                      {t.status === "done" ? (
-                        <Check size={14} color="#fff" />
-                      ) : (
-                        <CircleDot size={12} color={STATUS_COLOR[t.status]} />
-                      )}
-                    </button>
-                    <div className="min-w-0 flex-1">
-                      <div
-                        className={`truncate text-sm font-semibold ${t.status === "done" ? "text-gray-400 line-through" : "text-[#1A1A1A]"}`}
-                      >
-                        {t.title}
-                      </div>
-                      {t.description && (
-                        <div className="line-clamp-2 text-xs text-gray-500">
-                          {t.description}
-                        </div>
-                      )}
-                      <div className="mt-1 flex flex-wrap items-center gap-2 text-[10px] text-gray-500">
-                        <span
-                          className="rounded-full px-2 py-0.5 font-semibold"
-                          style={{
-                            background: `${STATUS_COLOR[t.status]}22`,
-                            color: STATUS_COLOR[t.status],
-                          }}
-                        >
-                          {STATUS_LABEL[t.status]}
-                        </span>
-                        {due && (
-                          <span className="flex items-center gap-1">
-                            <Calendar size={11} />
-                            {due.toLocaleString("pt-BR", {
-                              day: "2-digit",
-                              month: "2-digit",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </span>
-                        )}
-                        {assignee && (
-                          <span className="flex items-center gap-1">
-                            {assignee.profile?.avatar_url ? (
-                              <img
-                                src={assignee.profile.avatar_url}
-                                className="h-4 w-4 rounded-full object-cover"
-                                alt=""
-                              />
-                            ) : (
-                              <Avatar nome={name ?? "?"} size={16} />
-                            )}
-                            <span className="truncate">{name}</span>
-                          </span>
-                        )}
-                      </div>
+                  <div className="mb-2 flex items-center justify-between px-1">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="h-2 w-2 rounded-full"
+                        style={{ background: color }}
+                      />
+                      <span className="text-xs font-semibold text-[#1A1A1A]">
+                        {STATUS_LABEL[col]}
+                      </span>
+                      <span className="text-[10px] text-gray-500">
+                        {colTasks.length}
+                      </span>
                     </div>
-                    {canEdit && (
-                      <div className="flex flex-col gap-1">
-                        <button
-                          onClick={() => openEdit(t)}
-                          className="p-1 text-gray-500"
-                          aria-label="Editar"
-                        >
-                          <Pencil size={15} />
-                        </button>
-                        <button
-                          onClick={() => remove(t.id)}
-                          className="p-1 text-red-500"
-                          aria-label="Excluir"
-                        >
-                          <Trash2 size={15} />
-                        </button>
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    {colTasks.length === 0 ? (
+                      <div className="rounded-xl border border-dashed border-gray-300 py-6 text-center text-[11px] text-gray-400">
+                        Vazio
                       </div>
+                    ) : (
+                      colTasks.map((t) => {
+                        const assignee = members.find(
+                          (m) => m.user_id === t.assigned_to,
+                        );
+                        const name = assignee
+                          ? `${assignee.profile?.nome ?? ""} ${assignee.profile?.sobrenome ?? ""}`.trim() ||
+                            "Membro"
+                          : null;
+                        const due = t.due_date ? new Date(t.due_date) : null;
+                        const prevStatus =
+                          col === "in_progress"
+                            ? "pending"
+                            : col === "done"
+                              ? "in_progress"
+                              : null;
+                        const nextStatus =
+                          col === "pending"
+                            ? "in_progress"
+                            : col === "in_progress"
+                              ? "done"
+                              : null;
+                        return (
+                          <div
+                            key={t.id}
+                            className="rounded-xl border border-gray-100 bg-white p-2.5 shadow-sm"
+                            style={{ borderLeft: `3px solid ${color}` }}
+                          >
+                            <div className="flex items-start justify-between gap-2">
+                              <div
+                                className={`min-w-0 flex-1 text-[13px] font-semibold ${t.status === "done" ? "text-gray-400 line-through" : "text-[#1A1A1A]"}`}
+                              >
+                                {t.title}
+                              </div>
+                              {canEdit && (
+                                <button
+                                  onClick={() => openEdit(t)}
+                                  className="p-0.5 text-gray-400"
+                                  aria-label="Editar"
+                                >
+                                  <Pencil size={13} />
+                                </button>
+                              )}
+                            </div>
+                            {t.description && (
+                              <div className="mt-1 line-clamp-2 text-[11px] text-gray-500">
+                                {t.description}
+                              </div>
+                            )}
+                            <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-gray-500">
+                              {due && (
+                                <span className="flex items-center gap-1">
+                                  <Calendar size={10} />
+                                  {due.toLocaleString("pt-BR", {
+                                    day: "2-digit",
+                                    month: "2-digit",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })}
+                                </span>
+                              )}
+                              {assignee && (
+                                <span className="flex items-center gap-1">
+                                  {assignee.profile?.avatar_url ? (
+                                    <img
+                                      src={assignee.profile.avatar_url}
+                                      className="h-4 w-4 rounded-full object-cover"
+                                      alt=""
+                                    />
+                                  ) : (
+                                    <Avatar nome={name ?? "?"} size={16} />
+                                  )}
+                                  <span className="max-w-[80px] truncate">
+                                    {name}
+                                  </span>
+                                </span>
+                              )}
+                            </div>
+                            {canEdit && (
+                              <div className="mt-2 flex items-center justify-between border-t border-gray-100 pt-2">
+                                <button
+                                  onClick={() =>
+                                    prevStatus && update(t.id, { status: prevStatus })
+                                  }
+                                  disabled={!prevStatus}
+                                  className="flex h-6 w-6 items-center justify-center rounded-full bg-gray-100 text-gray-600 disabled:opacity-30"
+                                  aria-label="Mover para esquerda"
+                                >
+                                  <ChevronLeft size={14} />
+                                </button>
+                                <button
+                                  onClick={() => remove(t.id)}
+                                  className="p-1 text-red-400"
+                                  aria-label="Excluir"
+                                >
+                                  <Trash2 size={13} />
+                                </button>
+                                <button
+                                  onClick={() =>
+                                    nextStatus && update(t.id, { status: nextStatus })
+                                  }
+                                  disabled={!nextStatus}
+                                  className="flex h-6 w-6 items-center justify-center rounded-full text-white disabled:opacity-30"
+                                  style={{
+                                    background: nextStatus
+                                      ? STATUS_COLOR[nextStatus]
+                                      : "#9CA3AF",
+                                  }}
+                                  aria-label="Mover para direita"
+                                >
+                                  <ChevronRight size={14} />
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })
                     )}
                   </div>
-                </li>
+                </div>
               );
             })}
-          </ul>
+          </div>
         )}
       </section>
+
 
       <section className="mt-6 px-4">
         {isOwner ? (
