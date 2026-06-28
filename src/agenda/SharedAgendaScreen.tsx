@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   ChevronLeft,
   Clock,
@@ -10,6 +10,7 @@ import { useStore, uid } from "./store";
 import { useNav } from "./nav";
 import { Avatar, Modal, PriorityBadge, PriorityChips } from "./ui";
 import type { Priority, Task } from "./types";
+import { useFriendships } from "./hooks/useFriendships";
 
 export const SharedAgendaScreen = ({ id }: { id: string }) => {
   const { state, dispatch, toast } = useStore();
@@ -389,41 +390,39 @@ const InviteModal = ({
   agendaId: string;
   onClose: () => void;
 }) => {
-  const { dispatch, toast } = useStore();
-  const [email, setEmail] = useState("");
+  const { state, dispatch, toast } = useStore();
+  const { accepted: friends, loading } = useFriendships();
   const [papel, setPapel] = useState<"ADM" | "Membro">("Membro");
 
-  const submit = () => {
-    if (!email.trim()) {
-      toast({ kind: "error", text: "Informe o e-mail" });
-      return;
-    }
+  const membros = state.membros.filter((m) => m.agendaId === agendaId);
+  const friendsAvailable = useMemo(() => {
+    const emails = new Set(membros.map((m) => m.email.toLowerCase()));
+    const names = new Set(membros.map((m) => m.nome.trim().toLowerCase()));
+    return friends.filter((friend) => {
+      const email = friend.other.email?.toLowerCase();
+      const name = `${friend.other.nome} ${friend.other.sobrenome}`.trim().toLowerCase();
+      return (!email || !emails.has(email)) && (!name || !names.has(name));
+    });
+  }, [friends, membros]);
+
+  const addFriend = (friend: (typeof friends)[number]) => {
+    const nome = `${friend.other.nome} ${friend.other.sobrenome}`.trim() || "Amigo";
     dispatch({
       type: "ADD_MEMBRO",
       membro: {
-        id: uid(),
+        id: friend.other.id || uid(),
         agendaId,
-        nome: email.split("@")[0],
-        email,
+        nome,
+        email: friend.other.email ?? "",
         papel,
-        pendente: true,
       },
     });
-    toast({ kind: "success", text: "Convite enviado!" });
-    onClose();
+    toast({ kind: "success", text: "Amigo adicionado à agenda" });
   };
 
   return (
-    <Modal open onClose={onClose} title="Convidar membro">
+    <Modal open onClose={onClose} title="Adicionar amigos">
       <div className="space-y-4">
-        <input
-          autoFocus
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="E-mail do convidado"
-          className="w-full border-b border-[#F0F0F0] bg-transparent py-2 text-sm outline-none focus:border-[#2563EB]"
-        />
         <div>
           <div className="mb-2 text-xs font-semibold text-gray-600">Papel</div>
           <div className="flex gap-2">
@@ -442,12 +441,53 @@ const InviteModal = ({
             ))}
           </div>
         </div>
-        <button
-          onClick={submit}
-          className="w-full rounded-xl bg-[#2563EB] py-3 text-sm font-semibold text-white"
-        >
-          Enviar convite
-        </button>
+
+        {loading ? (
+          <div className="py-6 text-center text-sm text-gray-400">
+            Carregando amigos...
+          </div>
+        ) : friendsAvailable.length === 0 ? (
+          <div className="rounded-xl bg-gray-50 px-4 py-6 text-center text-sm text-gray-400">
+            Nenhum amigo disponível para adicionar.
+          </div>
+        ) : (
+          <ul className="flex max-h-[360px] flex-col gap-2 overflow-y-auto">
+            {friendsAvailable.map((friend) => {
+              const nome =
+                `${friend.other.nome} ${friend.other.sobrenome}`.trim() || "Amigo";
+              return (
+                <li
+                  key={friend.id}
+                  className="flex items-center gap-3 rounded-xl border border-gray-100 p-2"
+                >
+                  {friend.other.avatar_url ? (
+                    <img
+                      src={friend.other.avatar_url}
+                      alt={nome}
+                      className="h-9 w-9 rounded-full object-cover"
+                    />
+                  ) : (
+                    <Avatar nome={nome} size={36} />
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-semibold text-[#1A1A1A]">
+                      {nome}
+                    </div>
+                    <div className="truncate text-xs text-gray-400">
+                      {friend.other.email ?? "Sem e-mail"}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => addFriend(friend)}
+                    className="rounded-full bg-[#2563EB] px-3 py-1.5 text-[11px] font-semibold text-white"
+                  >
+                    Adicionar
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </div>
     </Modal>
   );
