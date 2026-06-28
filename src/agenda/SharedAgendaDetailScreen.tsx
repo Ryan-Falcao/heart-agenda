@@ -4,8 +4,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Calendar,
-  Check,
-  CircleDot,
   Loader2,
   LogOut,
   Pencil,
