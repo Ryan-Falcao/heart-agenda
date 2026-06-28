@@ -129,10 +129,6 @@ export const SharedAgendaDetailScreen = ({ id }: { id: string }) => {
     }
   };
 
-  const toggleDone = async (t: SharedTaskRow) => {
-    if (!canEdit) return;
-    await update(t.id, { status: t.status === "done" ? "pending" : "done" });
-  };
 
   const handleInvite = async (
     userId: string,
