@@ -13,6 +13,7 @@ import { SectionTitle } from "./ui";
 import { CreateAgendaModal } from "./CreateAgendaModal";
 import { JoinAgendaModal } from "./JoinAgendaModal";
 import { NotificationsPanel } from "./NotificationsPanel";
+import { useMyPendingInvites } from "./hooks/useAgendaInvites";
 
 const MONTHS = [
   "janeiro",
