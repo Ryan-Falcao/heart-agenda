@@ -58,7 +58,8 @@ export const HomeScreen = () => {
   const pessoais = state.agendas.filter((a) => !a.compartilhada);
   const compartilhadas = state.agendas.filter((a) => a.compartilhada);
 
-  const hasNotifications = todayEvents.length > 0;
+  const { invites: pendingInvites } = useMyPendingInvites();
+  const hasNotifications = todayEvents.length > 0 || pendingInvites.length > 0;
 
   return (
     <div className="pb-32">
