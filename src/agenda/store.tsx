@@ -58,65 +58,13 @@ const initialState = (): State => {
     }
   }
 
-  // Estado inicial sem datas dinâmicas (evita hydration mismatch)
-  const sharedId = "ag-shared-1";
+  // Estado inicial vazio — nenhuma agenda ou dado padrão
   return {
-    usuario: { nome: "Ryan", email: "ryan@email.com" },
-    agendas: [
-      {
-        id: "ag-rotina",
-        nome: "Rotina",
-        cor: "#B45309",
-        icone: "AlarmClock",
-        compartilhada: false,
-        subtitulo: "Hábitos diários",
-      },
-      {
-        id: "ag-trabalho",
-        nome: "Trabalho",
-        cor: "#7C3AED",
-        icone: "Briefcase",
-        compartilhada: false,
-        subtitulo: "Compromissos profissionais",
-      },
-      {
-        id: "ag-tarefas",
-        nome: "Tarefas",
-        cor: "#2563EB",
-        icone: "ClipboardList",
-        compartilhada: false,
-        subtitulo: "Lista pessoal",
-      },
-      {
-        id: sharedId,
-        nome: "Tarefas do trabalho ADM",
-        cor: "#3B82F6",
-        icone: "Users",
-        compartilhada: true,
-        descricao: "Coordenação de tarefas da equipe",
-        papel: "ADM",
-        subtitulo: "Compartilhada • 2 membros",
-      },
-    ],
-    // Sem eventos de exemplo — evita datas dinâmicas que quebram SSR
+    usuario: { nome: "", email: "" },
+    agendas: [],
     eventos: [],
     tasks: [],
-    membros: [
-      {
-        id: "m-ryan",
-        agendaId: sharedId,
-        nome: "Ryan",
-        email: "ryan@email.com",
-        papel: "ADM",
-      },
-      {
-        id: "m-nicolas",
-        agendaId: sharedId,
-        nome: "Nicolas",
-        email: "nicolas@email.com",
-        papel: "Membro",
-      },
-    ],
+    membros: [],
     comentarios: [],
     notif: {
       ativadas: true,
