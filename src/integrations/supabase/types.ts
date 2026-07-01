@@ -14,6 +14,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      agenda_invites: {
+        Row: {
+          agenda_id: string
+          code: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          invited_by: string
+          invited_email: string | null
+          role: Database["public"]["Enums"]["agenda_role"]
+          status: string
+        }
+        Insert: {
+          agenda_id: string
+          code?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          invited_by: string
+          invited_email?: string | null
+          role?: Database["public"]["Enums"]["agenda_role"]
+          status?: string
+        }
+        Update: {
+          agenda_id?: string
+          code?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          invited_by?: string
+          invited_email?: string | null
+          role?: Database["public"]["Enums"]["agenda_role"]
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agenda_invites_agenda_id_fkey"
+            columns: ["agenda_id"]
+            isOneToOne: false
+            referencedRelation: "shared_agendas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       friend_invite_codes: {
         Row: {
           code: string
@@ -204,6 +248,32 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      shared_task_completions: {
+        Row: {
+          completed_at: string
+          task_id: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string
+          task_id: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string
+          task_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_task_completions_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "shared_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       shared_tasks: {
         Row: {
