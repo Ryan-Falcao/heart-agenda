@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { Modal } from "./ui";
-import { useStore, uid } from "./store";
+import { useStore } from "./store";
+import { useAuth } from "./auth/AuthContext";
+import { joinAgendaByCode } from "./hooks/useAgendaInvites";
+import { useNav } from "./nav";
 
 export const JoinAgendaModal = ({
   open,
@@ -9,56 +12,48 @@ export const JoinAgendaModal = ({
   open: boolean;
   onClose: () => void;
 }) => {
-  const { dispatch, toast } = useStore();
+  const { toast } = useStore();
+  const { user } = useAuth();
+  const { go } = useNav();
   const [val, setVal] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const submit = () => {
+  const submit = async () => {
+    if (!user) {
+      toast({ kind: "error", text: "Faça login para entrar em uma agenda" });
+      return;
+    }
     if (!val.trim()) {
-      toast({ kind: "error", text: "Informe o código ou e-mail" });
+      toast({ kind: "error", text: "Informe o código" });
       return;
     }
     setLoading(true);
-    setTimeout(() => {
-      const id = uid();
-      dispatch({
-        type: "JOIN_AGENDA",
-        agenda: {
-          id,
-          nome: `Agenda ${val.slice(0, 8)}`,
-          cor: "#3B82F6",
-          icone: "Users",
-          compartilhada: true,
-          papel: "Membro",
-          subtitulo: "Compartilhada • Convidado",
-        },
-        membro: {
-          id: uid(),
-          agendaId: id,
-          nome: "Ryan",
-          email: "ryan@email.com",
-          papel: "Membro",
-        },
-      });
+    try {
+      const invite = await joinAgendaByCode(val, user.id);
       toast({ kind: "success", text: "Você entrou na agenda!" });
-      setLoading(false);
       setVal("");
       onClose();
-    }, 300);
+      go({ name: "sharedDetail", id: invite.agenda_id });
+    } catch (e: any) {
+      toast({ kind: "error", text: e?.message ?? "Erro ao entrar" });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <Modal open={open} onClose={onClose} title="Entrar em outra agenda">
       <div className="space-y-4">
         <p className="text-center text-xs text-gray-500">
-          Digite o código de convite ou e-mail do administrador da agenda
+          Digite o código de convite fornecido pelo dono da agenda
         </p>
         <input
           autoFocus
           value={val}
-          onChange={(e) => setVal(e.target.value)}
-          placeholder="Código ou e-mail"
-          className="w-full border-b border-[#F0F0F0] bg-transparent py-2 text-sm outline-none focus:border-[#2563EB]"
+          onChange={(e) => setVal(e.target.value.toUpperCase())}
+          placeholder="Ex: A1B2C3D4"
+          maxLength={16}
+          className="w-full rounded-xl border border-gray-200 bg-white px-3 py-3 text-center text-base font-mono tracking-widest outline-none focus:border-[#2563EB]"
         />
         <button
           type="button"
